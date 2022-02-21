@@ -49,7 +49,7 @@ def read_data_ohlc(filename, stock_code, usecols):
 
     df = string_to_number(df, stock_code)
     df = string_to_number(df, 'volume')
-    df = string_to_number(df, 'target')
+    df = string_to_number(df, 'one_year_target')
 
     latest_info = df.iloc[-1, :]
     latest_price = str(latest_info[0])
@@ -73,3 +73,52 @@ def read_data_ohlc(filename, stock_code, usecols):
     data.reset_index(drop=True, inplace = True)
 
     return data, latest_price, latest_change, df['one_year_target'][-1], df['volume'][-1]
+
+def animate(i):
+    time_stamp = datetime.datetime.now()
+    time_stamp = time_stamp.strftime('%Y-%m-%d ')
+    filename = str(time_stamp) + 'stock data.csv'
+    #filename = 'stock data.csv'
+    data, latest_price, latest_change, one_year_target, volume = read_data_ohlc(filename, Stock[0], [1,2,3,4,5]) #insert latest change
+
+    candle_counter = range(len(data['open'])-1)
+    ohlc = []
+    for candle in candle_counter:
+        append_me = candle_counter[candle], data['open'][candle], data['high'][candle], data['low'][candle], data['close'][candle]
+        ohlc.appen(append_me)
+
+    ax1.clear()
+    candlestick_ohlc(ax1, ohlc, width=0.4, colorup='#18b800', colordown='#ff3503')
+
+    ax1.plot(data['MA5'], color = 'pink', linestyle='-', linewidth=1, label='5 minutes MA')
+    ax1.plot(data['MA10'], color = 'orange', linestyle='-', linewidth=1, label='10 minutes MA')
+    ax1.plot(data['MA20'], color = '#08a0e9', linestyle='-', linewidth=1, label='20 minutes MA')
+
+    leg = ax1.legend(loc='upper left', facecolor = '#121416', fontsize = 10)
+    for text in leg.get_texts():
+        plt.setp(text, color = 'w')
+
+    figure_design(ax1)
+
+    ax1.text(0.005, 1.05, Stock[0], transform = ax1.transAxes, color = 'black', fontsize = 18, fontweight = 'bold', horizontalalignment = 'left', verticalalignment = 'center', bbox=dict(facecolor = '#FFBF00'))
+    ax1.text(0.2, 1.05, latest_price, transform = ax1.transAxes, color = 'white', fontsize = 18, fontweight = 'bold', horizontalalignment = 'center', verticalalignment = 'center')
+    
+    if latest_change[0] == '+':
+        colorcode='#18b800'
+    else:
+        colorcode='#ff3503'
+
+    ax1.text(0.4, 1.05, latest_change, transform = ax1.transAxes, color = colorcode, fontsize = 18, fontweight = 'bold', horizontalalignment = 'center', verticalalignment = 'center')
+
+    ax1.text(0.6, 1.05, one_year_target, transform = ax1.transAxes, color = '#08a0e9', fontsize = 18, fontweight = 'bold', horizontalalignment = 'center', verticalalignment = 'center')
+
+    time_stamp = datetime.datetime.now()
+    time_stamp = time_stamp.strftime('%Y-%m-%d %H:%M:%S')
+
+    ax1.text(1.4, 1.05, time_stamp, transform = ax1.transAxes, color = 'white', fontsize = 12, fontweight = 'bold', horizontalalignment = 'center', verticalalignment = 'center')
+
+    ax1.grid(True, color='grey', linestyle = '-', which ='major', axis = 'both', linewidth = 0.3)
+    ax1.set_xticklabels([])
+
+ani = animation.FuncAnimation(fig,animate, interval=1)
+plt.show()
