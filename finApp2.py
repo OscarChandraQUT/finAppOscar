@@ -63,3 +63,24 @@ def real_time_price(stock_code):  # get info from url
 
 Stock = ['AAPL']
 print(real_time_price('AAPL'))
+
+#storing to CSV file
+while(True):
+    data = []
+    col = []
+    time_stamp = datetime.datetime.now() - datetime. timedelta(hours= 15)
+    time_stamp = time_stamp.strftime('%Y-%m-%d %H:%M:%S')
+    for stock_code in Stock:
+        price, change, percent, volume, one_year_target = real_time_price(stock_code)
+        data.append(price)
+        data.extend([change])
+        data.extend([percent])
+        data.extend([str(volume)])
+        data.extend([one_year_target])
+    #print(data[str(volume)])
+    col = [time_stamp]
+    col.extend(data)
+    df = pd.DataFrame(col)
+    df = df.T
+    df.to_csv(str(time_stamp[0:11]) + 'stock data.csv', mode = 'a', header = False)
+    print(col)
